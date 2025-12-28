@@ -19,7 +19,7 @@ public class MyVaadinUI extends UI {
         layout.setMargin(true);
         setContent(layout);
 
-        Button button = new Button("Click Me");
+        final Button button = new Button("Click Me");
         button.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(ClickEvent event) {
@@ -27,5 +27,16 @@ public class MyVaadinUI extends UI {
             }
         });
         layout.addComponent(button);
+
+        final Button resetButton = new Button("Clear Messages");
+        resetButton.addClickListener(new Button.ClickListener() {
+            @Override
+            public void buttonClick(ClickEvent event) {
+                layout.removeAllComponents();
+                layout.addComponent(button);
+                layout.addComponent(resetButton);
+            }
+        });
+        layout.addComponent(resetButton);
     }
 }
