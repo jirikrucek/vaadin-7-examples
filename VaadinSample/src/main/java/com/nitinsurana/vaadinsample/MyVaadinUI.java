@@ -5,8 +5,11 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * The Application's "main" class
@@ -14,11 +17,46 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 public class MyVaadinUI extends UI {
 
+    private static final String STATS_PANEL_WIDTH = "400px";
+    
+    private int clickCount = 0;
+    private long sessionStartTime;
+    private long lastClickTime;
+    private Label totalClicksLabel;
+    private Label sessionStartLabel;
+    private Label timeSinceClickLabel;
+    private Label sessionDurationLabel;
+
     @Override
     protected void init(VaadinRequest request) {
+        sessionStartTime = System.currentTimeMillis();
+        lastClickTime = sessionStartTime;
+        
         final VerticalLayout layout = new VerticalLayout();
         layout.setMargin(true);
+        layout.setSpacing(true);
         setContent(layout);
+
+        // Create statistics panel
+        final Panel statsPanel = new Panel("Statistics Dashboard");
+        statsPanel.setWidth(STATS_PANEL_WIDTH);
+        VerticalLayout statsLayout = new VerticalLayout();
+        statsLayout.setMargin(true);
+        statsLayout.setSpacing(true);
+        
+        totalClicksLabel = new Label();
+        sessionStartLabel = new Label();
+        timeSinceClickLabel = new Label();
+        sessionDurationLabel = new Label();
+        
+        updateStatistics();
+        
+        statsLayout.addComponent(totalClicksLabel);
+        statsLayout.addComponent(sessionStartLabel);
+        statsLayout.addComponent(timeSinceClickLabel);
+        statsLayout.addComponent(sessionDurationLabel);
+        statsPanel.setContent(statsLayout);
+        layout.addComponent(statsPanel);
 
         final HorizontalLayout buttonLayout = new HorizontalLayout();
         buttonLayout.setSpacing(true);
@@ -27,6 +65,9 @@ public class MyVaadinUI extends UI {
         button.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(ClickEvent event) {
+                clickCount++;
+                updateStatistics();
+                lastClickTime = System.currentTimeMillis();
                 layout.addComponent(new Label("Thank you for clicking"));
             }
         });
@@ -37,11 +78,25 @@ public class MyVaadinUI extends UI {
             @Override
             public void buttonClick(ClickEvent event) {
                 layout.removeAllComponents();
+                layout.addComponent(statsPanel);
                 layout.addComponent(buttonLayout);
             }
         });
         buttonLayout.addComponent(resetButton);
 
         layout.addComponent(buttonLayout);
+    }
+    
+    private void updateStatistics() {
+        long currentTime = System.currentTimeMillis();
+        long sessionDuration = (currentTime - sessionStartTime) / 1000;
+        long timeSinceLastClick = (currentTime - lastClickTime) / 1000;
+        
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        
+        totalClicksLabel.setValue("Total Clicks: " + clickCount);
+        sessionStartLabel.setValue("Session Start Time: " + dateFormat.format(new Date(sessionStartTime)));
+        timeSinceClickLabel.setValue("Time Since Last Click: " + timeSinceLastClick + " seconds");
+        sessionDurationLabel.setValue("Session Duration: " + sessionDuration + " seconds");
     }
 }
