@@ -8,6 +8,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -16,10 +17,15 @@ import java.util.Date;
 @SuppressWarnings("serial")
 public class MyVaadinUI extends UI {
 
+    private static final String STATS_PANEL_WIDTH = "400px";
+    
     private int clickCount = 0;
     private long sessionStartTime;
     private long lastClickTime;
-    private Label statsLabel;
+    private Label totalClicksLabel;
+    private Label sessionStartLabel;
+    private Label timeSinceClickLabel;
+    private Label sessionDurationLabel;
 
     @Override
     protected void init(VaadinRequest request) {
@@ -33,16 +39,22 @@ public class MyVaadinUI extends UI {
 
         // Create statistics panel
         final Panel statsPanel = new Panel("Statistics Dashboard");
-        statsPanel.setWidth("400px");
+        statsPanel.setWidth(STATS_PANEL_WIDTH);
         VerticalLayout statsLayout = new VerticalLayout();
         statsLayout.setMargin(true);
         statsLayout.setSpacing(true);
         
-        statsLabel = new Label();
-        statsLabel.setContentMode(Label.CONTENT_XHTML);
+        totalClicksLabel = new Label();
+        sessionStartLabel = new Label();
+        timeSinceClickLabel = new Label();
+        sessionDurationLabel = new Label();
+        
         updateStatistics();
         
-        statsLayout.addComponent(statsLabel);
+        statsLayout.addComponent(totalClicksLabel);
+        statsLayout.addComponent(sessionStartLabel);
+        statsLayout.addComponent(timeSinceClickLabel);
+        statsLayout.addComponent(sessionDurationLabel);
         statsPanel.setContent(statsLayout);
         layout.addComponent(statsPanel);
 
@@ -80,13 +92,11 @@ public class MyVaadinUI extends UI {
         long sessionDuration = (currentTime - sessionStartTime) / 1000;
         long timeSinceLastClick = (currentTime - lastClickTime) / 1000;
         
-        String stats = "<div class='stats-container'>" +
-                "<div class='stats-row'><strong>Total Clicks:</strong> <span class='stats-total-clicks'>" + clickCount + "</span></div>" +
-                "<div class='stats-row'><strong>Session Start Time:</strong> " + new Date(sessionStartTime) + "</div>" +
-                "<div class='stats-row'><strong>Time Since Last Click:</strong> " + timeSinceLastClick + " seconds</div>" +
-                "<div class='stats-row'><strong>Session Duration:</strong> " + sessionDuration + " seconds</div>" +
-                "</div>";
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         
-        statsLabel.setValue(stats);
+        totalClicksLabel.setValue("Total Clicks: " + clickCount);
+        sessionStartLabel.setValue("Session Start Time: " + dateFormat.format(new Date(sessionStartTime)));
+        timeSinceClickLabel.setValue("Time Since Last Click: " + timeSinceLastClick + " seconds");
+        sessionDurationLabel.setValue("Session Duration: " + sessionDuration + " seconds");
     }
 }
