@@ -80,11 +80,11 @@ public class MyVaadinUI extends UI {
         long sessionDuration = (currentTime - sessionStartTime) / 1000;
         long timeSinceLastClick = (currentTime - lastClickTime) / 1000;
         
-        String stats = "<div style='font-family: Arial, sans-serif;'>" +
-                "<div style='margin-bottom: 10px;'><strong>Total Clicks:</strong> <span style='color: #2196F3; font-size: 18px;'>" + clickCount + "</span></div>" +
-                "<div style='margin-bottom: 10px;'><strong>Session Start Time:</strong> " + new Date(sessionStartTime) + "</div>" +
-                "<div style='margin-bottom: 10px;'><strong>Time Since Last Click:</strong> " + timeSinceLastClick + " seconds</div>" +
-                "<div style='margin-bottom: 10px;'><strong>Session Duration:</strong> " + sessionDuration + " seconds</div>" +
+        String stats = "<div class='stats-container'>" +
+                "<div class='stats-row'><strong>Total Clicks:</strong> <span class='stats-total-clicks'>" + clickCount + "</span></div>" +
+                "<div class='stats-row'><strong>Session Start Time:</strong> " + new Date(sessionStartTime) + "</div>" +
+                "<div class='stats-row'><strong>Time Since Last Click:</strong> " + timeSinceLastClick + " seconds</div>" +
+                "<div class='stats-row'><strong>Session Duration:</strong> " + sessionDuration + " seconds</div>" +
                 "</div>";
         
         statsLabel.setValue(stats);
