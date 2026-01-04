@@ -14,7 +14,6 @@ import java.util.Date;
 /**
  * The Application's "main" class
  */
-@SuppressWarnings("serial")
 public class MyVaadinUI extends UI {
 
     private static final String STATS_PANEL_WIDTH = "400px";
