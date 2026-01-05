@@ -4,6 +4,7 @@ import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -175,18 +176,154 @@ public class MyVaadinUITest {
         Panel statsPanel = (Panel) layout.getComponent(0);
         VerticalLayout statsLayout = (VerticalLayout) statsPanel.getContent();
         
-        assertEquals(4, statsLayout.getComponentCount(), 
-                    "Stats layout should have 4 labels");
+        assertEquals(6, statsLayout.getComponentCount(), 
+                    "Stats layout should have 6 labels");
         
         Label totalClicks = (Label) statsLayout.getComponent(0);
         Label sessionStart = (Label) statsLayout.getComponent(1);
         Label timeSinceClick = (Label) statsLayout.getComponent(2);
         Label sessionDuration = (Label) statsLayout.getComponent(3);
+        Label avgClicksPerMinute = (Label) statsLayout.getComponent(4);
+        Label peakActivity = (Label) statsLayout.getComponent(5);
         
         assertNotNull(totalClicks.getValue());
         assertNotNull(sessionStart.getValue());
         assertNotNull(timeSinceClick.getValue());
         assertNotNull(sessionDuration.getValue());
+        assertNotNull(avgClicksPerMinute.getValue());
+        assertNotNull(peakActivity.getValue());
+    }
+
+    @Test
+    @DisplayName("Click history panel should be present after initialization")
+    public void testClickHistoryPanelPresent() {
+        ui.init(request);
+        VerticalLayout layout = (VerticalLayout) ui.getContent();
+        
+        // Check for history panel (third component after stats panel and button layout)
+        assertTrue(layout.getComponentCount() >= 3, "Layout should contain at least 3 components");
+        
+        // The history panel should be a Panel
+        Panel historyPanel = null;
+        for (int i = 0; i < layout.getComponentCount(); i++) {
+            if (layout.getComponent(i) instanceof Panel) {
+                Panel panel = (Panel) layout.getComponent(i);
+                if ("Click History & Visualization".equals(panel.getCaption())) {
+                    historyPanel = panel;
+                    break;
+                }
+            }
+        }
+        
+        assertNotNull(historyPanel, "Click History & Visualization panel should exist");
+    }
+
+    @Test
+    @DisplayName("Average clicks per minute should be displayed")
+    public void testAverageClicksPerMinute() {
+        ui.init(request);
+        VerticalLayout layout = (VerticalLayout) ui.getContent();
+        Panel statsPanel = (Panel) layout.getComponent(0);
+        VerticalLayout statsLayout = (VerticalLayout) statsPanel.getContent();
+        
+        Label avgClicksLabel = (Label) statsLayout.getComponent(4);
+        assertTrue(avgClicksLabel.getValue().contains("Average Clicks/Minute:"), 
+                  "Average clicks per minute label should be present");
+    }
+
+    @Test
+    @DisplayName("Peak activity period should be displayed")
+    public void testPeakActivityPeriod() {
+        ui.init(request);
+        VerticalLayout layout = (VerticalLayout) ui.getContent();
+        Panel statsPanel = (Panel) layout.getComponent(0);
+        VerticalLayout statsLayout = (VerticalLayout) statsPanel.getContent();
+        
+        Label peakActivityLabel = (Label) statsLayout.getComponent(5);
+        assertTrue(peakActivityLabel.getValue().contains("Peak Activity:"), 
+                  "Peak activity label should be present");
+    }
+
+    @Test
+    @DisplayName("Click history table should be present")
+    public void testClickHistoryTablePresent() {
+        ui.init(request);
+        VerticalLayout layout = (VerticalLayout) ui.getContent();
+        
+        Panel historyPanel = null;
+        for (int i = 0; i < layout.getComponentCount(); i++) {
+            if (layout.getComponent(i) instanceof Panel) {
+                Panel panel = (Panel) layout.getComponent(i);
+                if ("Click History & Visualization".equals(panel.getCaption())) {
+                    historyPanel = panel;
+                    break;
+                }
+            }
+        }
+        
+        assertNotNull(historyPanel, "History panel should exist");
+        VerticalLayout historyLayout = (VerticalLayout) historyPanel.getContent();
+        
+        // Find the Click Event Log table
+        Table clickHistoryTable = null;
+        for (int i = 0; i < historyLayout.getComponentCount(); i++) {
+            if (historyLayout.getComponent(i) instanceof Table) {
+                Table table = (Table) historyLayout.getComponent(i);
+                if ("Click Event Log".equals(table.getCaption())) {
+                    clickHistoryTable = table;
+                    break;
+                }
+            }
+        }
+        
+        assertNotNull(clickHistoryTable, "Click Event Log table should exist");
+        assertTrue(clickHistoryTable.getContainerPropertyIds().contains("Click #"), 
+                  "Table should have Click # column");
+        assertTrue(clickHistoryTable.getContainerPropertyIds().contains("Timestamp"), 
+                  "Table should have Timestamp column");
+        assertTrue(clickHistoryTable.getContainerPropertyIds().contains("Interval (seconds)"), 
+                  "Table should have Interval column");
+    }
+
+    @Test
+    @DisplayName("Click pattern visualization table should be present")
+    public void testClickPatternVisualizationPresent() {
+        ui.init(request);
+        VerticalLayout layout = (VerticalLayout) ui.getContent();
+        
+        Panel historyPanel = null;
+        for (int i = 0; i < layout.getComponentCount(); i++) {
+            if (layout.getComponent(i) instanceof Panel) {
+                Panel panel = (Panel) layout.getComponent(i);
+                if ("Click History & Visualization".equals(panel.getCaption())) {
+                    historyPanel = panel;
+                    break;
+                }
+            }
+        }
+        
+        assertNotNull(historyPanel, "History panel should exist");
+        VerticalLayout historyLayout = (VerticalLayout) historyPanel.getContent();
+        
+        // Find the Click Pattern Visualization table
+        Table patternTable = null;
+        for (int i = 0; i < historyLayout.getComponentCount(); i++) {
+            if (historyLayout.getComponent(i) instanceof Table) {
+                Table table = (Table) historyLayout.getComponent(i);
+                if ("Click Pattern Visualization".equals(table.getCaption())) {
+                    patternTable = table;
+                    break;
+                }
+            }
+        }
+        
+        assertNotNull(patternTable, "Click Pattern Visualization table should exist");
+        assertTrue(patternTable.getContainerPropertyIds().contains("Time Period"), 
+                  "Table should have Time Period column");
+        assertTrue(patternTable.getContainerPropertyIds().contains("Clicks"), 
+                  "Table should have Clicks column");
+        assertTrue(patternTable.getContainerPropertyIds().contains("Visual"), 
+                  "Table should have Visual column");
     }
 
 }
