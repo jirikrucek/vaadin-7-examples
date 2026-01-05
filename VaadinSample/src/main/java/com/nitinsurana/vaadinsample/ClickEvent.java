@@ -15,7 +15,7 @@ public class ClickEvent {
     }
 
     public Date getTimestamp() {
-        return timestamp;
+        return new Date(timestamp.getTime());
     }
 
     public long getIntervalSinceLastClick() {

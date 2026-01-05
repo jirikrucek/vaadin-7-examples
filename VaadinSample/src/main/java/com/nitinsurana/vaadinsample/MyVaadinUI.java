@@ -19,6 +19,7 @@ import java.util.List;
 public class MyVaadinUI extends UI {
 
     private static final String STATS_PANEL_WIDTH = "400px";
+    private static final String HISTORY_PANEL_WIDTH = "800px";
     
     private int clickCount = 0;
     private long sessionStartTime;
@@ -38,7 +39,7 @@ public class MyVaadinUI extends UI {
     protected void init(VaadinRequest request) {
         sessionStartTime = System.currentTimeMillis();
         lastClickTime = sessionStartTime;
-        clickHistory = new ArrayList<ClickEvent>();
+        clickHistory = new ArrayList<>();
         
         final VerticalLayout layout = new VerticalLayout();
         layout.setMargin(true);
@@ -178,7 +179,7 @@ public class MyVaadinUI extends UI {
     
     private Panel createClickHistoryPanel() {
         Panel panel = new Panel("Click History & Visualization");
-        panel.setWidth("800px");
+        panel.setWidth(HISTORY_PANEL_WIDTH);
         
         VerticalLayout panelLayout = new VerticalLayout();
         panelLayout.setMargin(true);
