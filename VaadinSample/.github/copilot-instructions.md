@@ -44,6 +44,10 @@ mvn clean vaadin:update-widgetset vaadin:compile
 
 ## Key Patterns & Conventions
 
+### Code Reference
+- Always use the context7 MCP to reference documentation for libraries like Vaadin, GWT.
+- Only search three times maximum for any specific piece of documentation.
+
 ### Vaadin UI Development
 1. **Component Composition**: Build UIs declaratively (e.g., VerticalLayout with buttons and labels) - avoid manual DOM manipulation
 2. **Event Handling**: Use anonymous `ClickListener` implementations (legacy Vaadin 7 pattern; note: newer Vaadin uses lambdas)
