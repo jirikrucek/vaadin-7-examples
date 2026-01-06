@@ -86,7 +86,6 @@ public class MyVaadinUI extends UI {
                 updateStatistics();
                 lastClickTime = System.currentTimeMillis();
                 addClickToHistory();
-                layout.addComponent(new Label("Thank you for clicking"));
             }
         });
         buttonLayout.addComponent(button);
