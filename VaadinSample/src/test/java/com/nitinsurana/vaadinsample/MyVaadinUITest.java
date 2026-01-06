@@ -237,17 +237,15 @@ public class MyVaadinUITest {
         clickButton.click();
         String secondValue = timeSinceClickLabel.getValue();
         
-        // Extract the number of seconds from the label
-        String[] parts = secondValue.split(":");
-        if (parts.length >= 2) {
-            String secondsPart = parts[1].trim().split(" ")[0];
-            try {
-                int seconds = Integer.parseInt(secondsPart);
-                assertTrue(seconds >= 1, "Time since last click should be at least 1 second, but was: " + seconds);
-            } catch (NumberFormatException e) {
-                fail("Unable to parse seconds from label value: '" + secondValue + "'");
-            }
-        }
+        // Extract the number of seconds from the label using regex for robust parsing
+        // Expected format: "Time Since Last Click: X seconds"
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("Time Since Last Click:\\s*(\\d+)\\s*seconds?");
+        java.util.regex.Matcher matcher = pattern.matcher(secondValue);
+        
+        assertTrue(matcher.find(), "Label should match expected format: '" + secondValue + "'");
+        
+        int seconds = Integer.parseInt(matcher.group(1));
+        assertTrue(seconds >= 1, "Time since last click should be at least 1 second, but was: " + seconds);
     }
 
     @Test
