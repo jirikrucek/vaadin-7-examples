@@ -88,6 +88,7 @@ public class MyVaadinUI extends UI {
             @Override
             public void buttonClick(ClickEvent event) {
                 clickCount = 0;
+                lastClickTime = System.currentTimeMillis();
                 updateStatistics();
             }
         });
