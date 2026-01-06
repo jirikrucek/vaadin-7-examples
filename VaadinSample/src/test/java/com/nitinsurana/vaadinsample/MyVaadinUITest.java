@@ -241,8 +241,12 @@ public class MyVaadinUITest {
         String[] parts = secondValue.split(":");
         if (parts.length >= 2) {
             String secondsPart = parts[1].trim().split(" ")[0];
-            int seconds = Integer.parseInt(secondsPart);
-            assertTrue(seconds >= 1, "Time since last click should be at least 1 second, but was: " + seconds);
+            try {
+                int seconds = Integer.parseInt(secondsPart);
+                assertTrue(seconds >= 1, "Time since last click should be at least 1 second, but was: " + seconds);
+            } catch (NumberFormatException e) {
+                fail("Unable to parse seconds from label value: '" + secondValue + "'");
+            }
         }
     }
 
