@@ -47,13 +47,13 @@ public class MyVaadinUITest {
     }
 
     @Test
-    @DisplayName("Button click should increment click counter")
+    @DisplayName("Button click should increment click counter and add history entry")
     public void testButtonClickIncrementsCounter() {
         ui.init(request);
         
         VerticalLayout mainLayout = (VerticalLayout) ui.getContent();
         
-        // Find the HorizontalLayout containing buttons (typically second component)
+        // Find the HorizontalLayout containing buttons
         com.vaadin.ui.HorizontalLayout buttonLayout = null;
         for (int i = 0; i < mainLayout.getComponentCount(); i++) {
             if (mainLayout.getComponent(i) instanceof com.vaadin.ui.HorizontalLayout) {
@@ -76,16 +76,30 @@ public class MyVaadinUITest {
             }
         }
         assertNotNull(clickButton, "Click Me button should exist");
+        
+        // Get history panel and verify initial state
+        Panel historyPanel = (Panel) mainLayout.getComponent(1);
+        VerticalLayout historyLayout = (VerticalLayout) historyPanel.getContent();
+        assertEquals(0, historyLayout.getComponentCount(), "History should be empty initially");
+        
+        // Simulate button click
+        clickButton.click();
+        
+        // Verify history entry was added
+        assertEquals(1, historyLayout.getComponentCount(), "History should have 1 entry after click");
+        Label historyEntry = (Label) historyLayout.getComponent(0);
+        assertTrue(historyEntry.getValue().startsWith("Click #1 at "), 
+                  "History entry should have correct format");
     }
 
     @Test
-    @DisplayName("Reset button should clear components except stats panel and buttons")
-    public void testResetButtonStructure() {
+    @DisplayName("Multiple clicks should add multiple history entries")
+    public void testMultipleClicksAddMultipleEntries() {
         ui.init(request);
         
         VerticalLayout mainLayout = (VerticalLayout) ui.getContent();
         
-        // Find the HorizontalLayout containing buttons
+        // Find the Click Me button
         com.vaadin.ui.HorizontalLayout buttonLayout = null;
         for (int i = 0; i < mainLayout.getComponentCount(); i++) {
             if (mainLayout.getComponent(i) instanceof com.vaadin.ui.HorizontalLayout) {
@@ -94,20 +108,85 @@ public class MyVaadinUITest {
             }
         }
         
-        assertNotNull(buttonLayout, "Button layout should exist");
-        
-        // Find the Clear Messages button
-        Button resetButton = null;
+        Button clickButton = null;
         for (int i = 0; i < buttonLayout.getComponentCount(); i++) {
             if (buttonLayout.getComponent(i) instanceof Button) {
                 Button btn = (Button) buttonLayout.getComponent(i);
-                if ("Clear Messages".equals(btn.getCaption())) {
-                    resetButton = btn;
+                if ("Click Me".equals(btn.getCaption())) {
+                    clickButton = btn;
                     break;
                 }
             }
         }
-        assertNotNull(resetButton, "Clear Messages button should exist");
+        
+        // Get history panel
+        Panel historyPanel = (Panel) mainLayout.getComponent(1);
+        VerticalLayout historyLayout = (VerticalLayout) historyPanel.getContent();
+        
+        // Click multiple times
+        clickButton.click();
+        clickButton.click();
+        clickButton.click();
+        
+        // Verify 3 history entries were added
+        assertEquals(3, historyLayout.getComponentCount(), "History should have 3 entries after 3 clicks");
+        
+        // Verify entries have correct format
+        Label firstEntry = (Label) historyLayout.getComponent(0);
+        Label secondEntry = (Label) historyLayout.getComponent(1);
+        Label thirdEntry = (Label) historyLayout.getComponent(2);
+        
+        assertTrue(firstEntry.getValue().startsWith("Click #1 at "), "First entry should be Click #1");
+        assertTrue(secondEntry.getValue().startsWith("Click #2 at "), "Second entry should be Click #2");
+        assertTrue(thirdEntry.getValue().startsWith("Click #3 at "), "Third entry should be Click #3");
+    }
+
+    @Test
+    @DisplayName("Clear History button should remove all history entries")
+    public void testClearHistoryButtonFunctionality() {
+        ui.init(request);
+        
+        VerticalLayout mainLayout = (VerticalLayout) ui.getContent();
+        
+        // Find buttons
+        com.vaadin.ui.HorizontalLayout buttonLayout = null;
+        for (int i = 0; i < mainLayout.getComponentCount(); i++) {
+            if (mainLayout.getComponent(i) instanceof com.vaadin.ui.HorizontalLayout) {
+                buttonLayout = (com.vaadin.ui.HorizontalLayout) mainLayout.getComponent(i);
+                break;
+            }
+        }
+        
+        Button clickButton = null;
+        Button clearHistoryButton = null;
+        for (int i = 0; i < buttonLayout.getComponentCount(); i++) {
+            if (buttonLayout.getComponent(i) instanceof Button) {
+                Button btn = (Button) buttonLayout.getComponent(i);
+                if ("Click Me".equals(btn.getCaption())) {
+                    clickButton = btn;
+                } else if ("Clear History".equals(btn.getCaption())) {
+                    clearHistoryButton = btn;
+                }
+            }
+        }
+        
+        assertNotNull(clickButton, "Click Me button should exist");
+        assertNotNull(clearHistoryButton, "Clear History button should exist");
+        
+        // Get history panel
+        Panel historyPanel = (Panel) mainLayout.getComponent(1);
+        VerticalLayout historyLayout = (VerticalLayout) historyPanel.getContent();
+        
+        // Add some history entries
+        clickButton.click();
+        clickButton.click();
+        assertEquals(2, historyLayout.getComponentCount(), "History should have 2 entries");
+        
+        // Clear history
+        clearHistoryButton.click();
+        
+        // Verify history is cleared
+        assertEquals(0, historyLayout.getComponentCount(), "History should be empty after clearing");
     }
 
     @Test
@@ -260,8 +339,8 @@ public class MyVaadinUITest {
     }
 
     @Test
-    @DisplayName("Reset button should preserve history panel when clearing messages")
-    public void testResetButtonPreservesHistoryPanel() {
+    @DisplayName("Panels should be properly initialized")
+    public void testPanelsInitialized() {
         ui.init(request);
         
         VerticalLayout mainLayout = (VerticalLayout) ui.getContent();
@@ -278,8 +357,8 @@ public class MyVaadinUITest {
     }
 
     @Test
-    @DisplayName("Three buttons should be present in button layout")
-    public void testThreeButtonsPresent() {
+    @DisplayName("Two buttons should be present in button layout")
+    public void testTwoButtonsPresent() {
         ui.init(request);
         
         VerticalLayout mainLayout = (VerticalLayout) ui.getContent();
@@ -303,7 +382,7 @@ public class MyVaadinUITest {
             }
         }
         
-        assertEquals(3, buttonCount, "Should have exactly 3 buttons");
+        assertEquals(2, buttonCount, "Should have exactly 2 buttons (Click Me and Clear History)");
     }
 
 }

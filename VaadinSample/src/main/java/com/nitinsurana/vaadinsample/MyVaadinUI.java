@@ -21,7 +21,14 @@ public class MyVaadinUI extends UI {
     private static final String STATS_PANEL_WIDTH = "400px";
     private static final String HISTORY_PANEL_WIDTH = "500px";
     private static final String HISTORY_PANEL_HEIGHT = "300px";
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    
+    // ThreadLocal to ensure thread-safety for SimpleDateFormat in multi-user web application
+    private static final ThreadLocal<SimpleDateFormat> DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        }
+    };
     
     private int clickCount = 0;
     private long sessionStartTime;
@@ -90,18 +97,6 @@ public class MyVaadinUI extends UI {
         });
         buttonLayout.addComponent(button);
 
-        final Button resetButton = new Button("Clear Messages");
-        resetButton.addClickListener(new Button.ClickListener() {
-            @Override
-            public void buttonClick(ClickEvent event) {
-                layout.removeAllComponents();
-                layout.addComponent(statsPanel);
-                layout.addComponent(historyPanel);
-                layout.addComponent(buttonLayout);
-            }
-        });
-        buttonLayout.addComponent(resetButton);
-
         final Button clearHistoryButton = new Button("Clear History");
         clearHistoryButton.addClickListener(new Button.ClickListener() {
             @Override
@@ -121,13 +116,13 @@ public class MyVaadinUI extends UI {
         long timeSinceLastClick = (currentTime - lastClickTime) / 1000;
         
         totalClicksLabel.setValue("Total Clicks: " + clickCount);
-        sessionStartLabel.setValue("Session Start Time: " + DATE_FORMAT.format(new Date(sessionStartTime)));
+        sessionStartLabel.setValue("Session Start Time: " + DATE_FORMAT.get().format(new Date(sessionStartTime)));
         timeSinceClickLabel.setValue("Time Since Last Click: " + timeSinceLastClick + " seconds");
         sessionDurationLabel.setValue("Session Duration: " + sessionDuration + " seconds");
     }
     
     private void addClickToHistory() {
-        String timestamp = DATE_FORMAT.format(new Date(lastClickTime));
+        String timestamp = DATE_FORMAT.get().format(new Date(lastClickTime));
         String historyEntry = "Click #" + clickCount + " at " + timestamp;
         clickHistory.add(historyEntry);
         
