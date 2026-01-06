@@ -157,6 +157,8 @@ public class MyVaadinUITest {
             }
         }
         
+        assertNotNull(buttonLayout, "Button layout with action buttons should exist");
+        
         Button clickButton = null;
         Button clearHistoryButton = null;
         for (int i = 0; i < buttonLayout.getComponentCount(); i++) {
