@@ -83,6 +83,16 @@ public class MyVaadinUI extends UI {
         });
         buttonLayout.addComponent(resetButton);
 
+        final Button resetStatsButton = new Button("Reset Statistics");
+        resetStatsButton.addClickListener(new Button.ClickListener() {
+            @Override
+            public void buttonClick(ClickEvent event) {
+                clickCount = 0;
+                updateStatistics();
+            }
+        });
+        buttonLayout.addComponent(resetStatsButton);
+
         layout.addComponent(buttonLayout);
     }
     

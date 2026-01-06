@@ -189,4 +189,36 @@ public class MyVaadinUITest {
         assertNotNull(sessionDuration.getValue());
     }
 
+    @Test
+    @DisplayName("Reset Statistics button should be present")
+    public void testResetStatisticsButtonPresent() {
+        ui.init(request);
+        
+        VerticalLayout mainLayout = (VerticalLayout) ui.getContent();
+        
+        // Find the HorizontalLayout containing buttons
+        com.vaadin.ui.HorizontalLayout buttonLayout = null;
+        for (int i = 0; i < mainLayout.getComponentCount(); i++) {
+            if (mainLayout.getComponent(i) instanceof com.vaadin.ui.HorizontalLayout) {
+                buttonLayout = (com.vaadin.ui.HorizontalLayout) mainLayout.getComponent(i);
+                break;
+            }
+        }
+        
+        assertNotNull(buttonLayout, "Button layout should exist");
+        
+        // Find the Reset Statistics button
+        Button resetStatsButton = null;
+        for (int i = 0; i < buttonLayout.getComponentCount(); i++) {
+            if (buttonLayout.getComponent(i) instanceof Button) {
+                Button btn = (Button) buttonLayout.getComponent(i);
+                if ("Reset Statistics".equals(btn.getCaption())) {
+                    resetStatsButton = btn;
+                    break;
+                }
+            }
+        }
+        assertNotNull(resetStatsButton, "Reset Statistics button should exist");
+    }
+
 }
