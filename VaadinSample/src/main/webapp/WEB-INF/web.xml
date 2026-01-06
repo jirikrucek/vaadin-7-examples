@@ -14,7 +14,7 @@
             <param-name>UI</param-name>
             <param-value>com.nitinsurana.vaadinsample.MyVaadinUI</param-value>
         </init-param>
-                <init-param>
+        <init-param>
             <description>Application widgetset</description>
             <param-name>widgetset</param-name>
             <param-value>com.nitinsurana.vaadinsample.AppWidgetSet</param-value>
