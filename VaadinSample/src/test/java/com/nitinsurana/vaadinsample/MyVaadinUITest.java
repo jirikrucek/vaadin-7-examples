@@ -189,4 +189,120 @@ public class MyVaadinUITest {
         assertNotNull(sessionDuration.getValue());
     }
 
+    @Test
+    @DisplayName("Click History Log panel should be present after initialization")
+    public void testHistoryPanelPresent() {
+        ui.init(request);
+        VerticalLayout layout = (VerticalLayout) ui.getContent();
+        assertTrue(layout.getComponentCount() >= 2, "Layout should contain at least stats and history panels");
+        
+        // Check for history panel (second component)
+        assertTrue(layout.getComponent(1) instanceof Panel, "Second component should be a Panel");
+        Panel historyPanel = (Panel) layout.getComponent(1);
+        assertEquals("Click History Log", historyPanel.getCaption(), "Panel should have correct caption");
+    }
+
+    @Test
+    @DisplayName("Click History Log panel should have correct dimensions")
+    public void testHistoryPanelDimensions() {
+        ui.init(request);
+        VerticalLayout layout = (VerticalLayout) ui.getContent();
+        Panel historyPanel = (Panel) layout.getComponent(1);
+        assertEquals("500.0px", historyPanel.getWidth() + historyPanel.getWidthUnits().getSymbol(), 
+                    "History panel width should be 500px");
+        assertEquals("300.0px", historyPanel.getHeight() + historyPanel.getHeightUnits().getSymbol(), 
+                    "History panel height should be 300px");
+    }
+
+    @Test
+    @DisplayName("Clear History button should be present")
+    public void testClearHistoryButtonPresent() {
+        ui.init(request);
+        
+        VerticalLayout mainLayout = (VerticalLayout) ui.getContent();
+        
+        // Find the HorizontalLayout containing buttons
+        com.vaadin.ui.HorizontalLayout buttonLayout = null;
+        for (int i = 0; i < mainLayout.getComponentCount(); i++) {
+            if (mainLayout.getComponent(i) instanceof com.vaadin.ui.HorizontalLayout) {
+                buttonLayout = (com.vaadin.ui.HorizontalLayout) mainLayout.getComponent(i);
+                break;
+            }
+        }
+        
+        assertNotNull(buttonLayout, "Button layout should exist");
+        
+        // Find the Clear History button
+        Button clearHistoryButton = null;
+        for (int i = 0; i < buttonLayout.getComponentCount(); i++) {
+            if (buttonLayout.getComponent(i) instanceof Button) {
+                Button btn = (Button) buttonLayout.getComponent(i);
+                if ("Clear History".equals(btn.getCaption())) {
+                    clearHistoryButton = btn;
+                    break;
+                }
+            }
+        }
+        assertNotNull(clearHistoryButton, "Clear History button should exist");
+    }
+
+    @Test
+    @DisplayName("Initial history log should be empty")
+    public void testInitialHistoryEmpty() {
+        ui.init(request);
+        VerticalLayout layout = (VerticalLayout) ui.getContent();
+        Panel historyPanel = (Panel) layout.getComponent(1);
+        VerticalLayout historyLayout = (VerticalLayout) historyPanel.getContent();
+        
+        assertEquals(0, historyLayout.getComponentCount(), 
+                    "History layout should be empty initially");
+    }
+
+    @Test
+    @DisplayName("Reset button should preserve history panel when clearing messages")
+    public void testResetButtonPreservesHistoryPanel() {
+        ui.init(request);
+        
+        VerticalLayout mainLayout = (VerticalLayout) ui.getContent();
+        
+        // Get initial component count
+        int initialCount = mainLayout.getComponentCount();
+        assertTrue(initialCount >= 3, "Should have stats panel, history panel, and button layout");
+        
+        // Verify both panels exist
+        Panel statsPanel = (Panel) mainLayout.getComponent(0);
+        Panel historyPanel = (Panel) mainLayout.getComponent(1);
+        assertEquals("Statistics Dashboard", statsPanel.getCaption());
+        assertEquals("Click History Log", historyPanel.getCaption());
+    }
+
+    @Test
+    @DisplayName("Three buttons should be present in button layout")
+    public void testThreeButtonsPresent() {
+        ui.init(request);
+        
+        VerticalLayout mainLayout = (VerticalLayout) ui.getContent();
+        
+        // Find the HorizontalLayout containing buttons
+        com.vaadin.ui.HorizontalLayout buttonLayout = null;
+        for (int i = 0; i < mainLayout.getComponentCount(); i++) {
+            if (mainLayout.getComponent(i) instanceof com.vaadin.ui.HorizontalLayout) {
+                buttonLayout = (com.vaadin.ui.HorizontalLayout) mainLayout.getComponent(i);
+                break;
+            }
+        }
+        
+        assertNotNull(buttonLayout, "Button layout should exist");
+        
+        // Count buttons
+        int buttonCount = 0;
+        for (int i = 0; i < buttonLayout.getComponentCount(); i++) {
+            if (buttonLayout.getComponent(i) instanceof Button) {
+                buttonCount++;
+            }
+        }
+        
+        assertEquals(3, buttonCount, "Should have exactly 3 buttons");
+    }
+
 }

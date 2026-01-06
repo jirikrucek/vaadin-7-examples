@@ -9,7 +9,9 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * The Application's "main" class
@@ -17,6 +19,8 @@ import java.util.Date;
 public class MyVaadinUI extends UI {
 
     private static final String STATS_PANEL_WIDTH = "400px";
+    private static final String HISTORY_PANEL_WIDTH = "500px";
+    private static final String HISTORY_PANEL_HEIGHT = "300px";
     
     private int clickCount = 0;
     private long sessionStartTime;
@@ -25,11 +29,14 @@ public class MyVaadinUI extends UI {
     private Label sessionStartLabel;
     private Label timeSinceClickLabel;
     private Label sessionDurationLabel;
+    private VerticalLayout historyLayout;
+    private List<String> clickHistory;
 
     @Override
     protected void init(VaadinRequest request) {
         sessionStartTime = System.currentTimeMillis();
         lastClickTime = sessionStartTime;
+        clickHistory = new ArrayList<String>();
         
         final VerticalLayout layout = new VerticalLayout();
         layout.setMargin(true);
@@ -57,6 +64,16 @@ public class MyVaadinUI extends UI {
         statsPanel.setContent(statsLayout);
         layout.addComponent(statsPanel);
 
+        // Create click history panel
+        final Panel historyPanel = new Panel("Click History Log");
+        historyPanel.setWidth(HISTORY_PANEL_WIDTH);
+        historyPanel.setHeight(HISTORY_PANEL_HEIGHT);
+        historyLayout = new VerticalLayout();
+        historyLayout.setMargin(true);
+        historyLayout.setSpacing(true);
+        historyPanel.setContent(historyLayout);
+        layout.addComponent(historyPanel);
+
         final HorizontalLayout buttonLayout = new HorizontalLayout();
         buttonLayout.setSpacing(true);
 
@@ -67,6 +84,7 @@ public class MyVaadinUI extends UI {
                 clickCount++;
                 updateStatistics();
                 lastClickTime = System.currentTimeMillis();
+                addClickToHistory();
                 layout.addComponent(new Label("Thank you for clicking"));
             }
         });
@@ -78,10 +96,21 @@ public class MyVaadinUI extends UI {
             public void buttonClick(ClickEvent event) {
                 layout.removeAllComponents();
                 layout.addComponent(statsPanel);
+                layout.addComponent(historyPanel);
                 layout.addComponent(buttonLayout);
             }
         });
         buttonLayout.addComponent(resetButton);
+
+        final Button clearHistoryButton = new Button("Clear History");
+        clearHistoryButton.addClickListener(new Button.ClickListener() {
+            @Override
+            public void buttonClick(ClickEvent event) {
+                clickHistory.clear();
+                historyLayout.removeAllComponents();
+            }
+        });
+        buttonLayout.addComponent(clearHistoryButton);
 
         layout.addComponent(buttonLayout);
     }
@@ -97,5 +126,15 @@ public class MyVaadinUI extends UI {
         sessionStartLabel.setValue("Session Start Time: " + dateFormat.format(new Date(sessionStartTime)));
         timeSinceClickLabel.setValue("Time Since Last Click: " + timeSinceLastClick + " seconds");
         sessionDurationLabel.setValue("Session Duration: " + sessionDuration + " seconds");
+    }
+    
+    private void addClickToHistory() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String timestamp = dateFormat.format(new Date(lastClickTime));
+        String historyEntry = "Click #" + clickCount + " at " + timestamp;
+        clickHistory.add(historyEntry);
+        
+        Label historyLabel = new Label(historyEntry);
+        historyLayout.addComponent(historyLabel);
     }
 }
