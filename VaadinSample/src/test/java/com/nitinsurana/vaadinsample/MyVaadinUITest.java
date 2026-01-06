@@ -190,6 +190,61 @@ public class MyVaadinUITest {
     }
 
     @Test
+    @DisplayName("Time since last click should be calculated correctly")
+    public void testTimeSinceLastClickCalculation() throws InterruptedException {
+        ui.init(request);
+        
+        VerticalLayout mainLayout = (VerticalLayout) ui.getContent();
+        
+        // Find the Click Me button
+        com.vaadin.ui.HorizontalLayout buttonLayout = null;
+        for (int i = 0; i < mainLayout.getComponentCount(); i++) {
+            if (mainLayout.getComponent(i) instanceof com.vaadin.ui.HorizontalLayout) {
+                buttonLayout = (com.vaadin.ui.HorizontalLayout) mainLayout.getComponent(i);
+                break;
+            }
+        }
+        
+        Button clickButton = null;
+        for (int i = 0; i < buttonLayout.getComponentCount(); i++) {
+            if (buttonLayout.getComponent(i) instanceof Button) {
+                Button btn = (Button) buttonLayout.getComponent(i);
+                if ("Click Me".equals(btn.getCaption())) {
+                    clickButton = btn;
+                    break;
+                }
+            }
+        }
+        
+        assertNotNull(clickButton, "Click Me button should exist");
+        
+        // Get stats panel
+        Panel statsPanel = (Panel) mainLayout.getComponent(0);
+        VerticalLayout statsLayout = (VerticalLayout) statsPanel.getContent();
+        Label timeSinceClickLabel = (Label) statsLayout.getComponent(2);
+        
+        // First click - time since last click should be 0 or very small (initial state)
+        clickButton.click();
+        String firstValue = timeSinceClickLabel.getValue();
+        assertTrue(firstValue.contains("Time Since Last Click:"), "Label should show time since last click");
+        
+        // Wait a bit (at least 1 second to ensure measurable difference)
+        Thread.sleep(1100);
+        
+        // Second click - time since last click should be at least 1 second (not 0)
+        clickButton.click();
+        String secondValue = timeSinceClickLabel.getValue();
+        
+        // Extract the number of seconds from the label
+        String[] parts = secondValue.split(":");
+        if (parts.length >= 2) {
+            String secondsPart = parts[1].trim().split(" ")[0];
+            int seconds = Integer.parseInt(secondsPart);
+            assertTrue(seconds >= 1, "Time since last click should be at least 1 second, but was: " + seconds);
+        }
+    }
+
+    @Test
     @DisplayName("Statistics panel width should be 400px")
     public void testStatisticsPanelWidth() {
         ui.init(request);
