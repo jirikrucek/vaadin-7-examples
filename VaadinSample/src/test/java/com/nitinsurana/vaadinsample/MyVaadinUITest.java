@@ -208,6 +208,7 @@ public class MyVaadinUITest {
         ui.init(request);
         VerticalLayout layout = (VerticalLayout) ui.getContent();
         Panel historyPanel = (Panel) layout.getComponent(1);
+        // Expected dimensions match HISTORY_PANEL_WIDTH and HISTORY_PANEL_HEIGHT constants
         assertEquals("500.0px", historyPanel.getWidth() + historyPanel.getWidthUnits().getSymbol(), 
                     "History panel width should be 500px");
         assertEquals("300.0px", historyPanel.getHeight() + historyPanel.getHeightUnits().getSymbol(), 

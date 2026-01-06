@@ -21,6 +21,7 @@ public class MyVaadinUI extends UI {
     private static final String STATS_PANEL_WIDTH = "400px";
     private static final String HISTORY_PANEL_WIDTH = "500px";
     private static final String HISTORY_PANEL_HEIGHT = "300px";
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     
     private int clickCount = 0;
     private long sessionStartTime;
@@ -36,7 +37,7 @@ public class MyVaadinUI extends UI {
     protected void init(VaadinRequest request) {
         sessionStartTime = System.currentTimeMillis();
         lastClickTime = sessionStartTime;
-        clickHistory = new ArrayList<String>();
+        clickHistory = new ArrayList<>();
         
         final VerticalLayout layout = new VerticalLayout();
         layout.setMargin(true);
@@ -120,17 +121,14 @@ public class MyVaadinUI extends UI {
         long sessionDuration = (currentTime - sessionStartTime) / 1000;
         long timeSinceLastClick = (currentTime - lastClickTime) / 1000;
         
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        
         totalClicksLabel.setValue("Total Clicks: " + clickCount);
-        sessionStartLabel.setValue("Session Start Time: " + dateFormat.format(new Date(sessionStartTime)));
+        sessionStartLabel.setValue("Session Start Time: " + DATE_FORMAT.format(new Date(sessionStartTime)));
         timeSinceClickLabel.setValue("Time Since Last Click: " + timeSinceLastClick + " seconds");
         sessionDurationLabel.setValue("Session Duration: " + sessionDuration + " seconds");
     }
     
     private void addClickToHistory() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String timestamp = dateFormat.format(new Date(lastClickTime));
+        String timestamp = DATE_FORMAT.format(new Date(lastClickTime));
         String historyEntry = "Click #" + clickCount + " at " + timestamp;
         clickHistory.add(historyEntry);
         
