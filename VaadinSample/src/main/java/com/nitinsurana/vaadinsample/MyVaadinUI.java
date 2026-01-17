@@ -125,9 +125,16 @@ public class MyVaadinUI extends UI {
 
         // Export CSV button with FileDownloader
         final Button exportCsvButton = new Button("Export CSV");
-        StreamResource csvResource = createCsvResource();
-        FileDownloader fileDownloader = new FileDownloader(csvResource);
+        final StreamResource csvResource = createCsvResource();
+        final FileDownloader fileDownloader = new FileDownloader(csvResource);
         fileDownloader.extend(exportCsvButton);
+        // Update filename before each download to reflect current time
+        exportCsvButton.addClickListener(new Button.ClickListener() {
+            @Override
+            public void buttonClick(ClickEvent event) {
+                csvResource.setFilename(generateCsvFilename());
+            }
+        });
         buttonLayout.addComponent(exportCsvButton);
 
         layout.addComponent(buttonLayout);

@@ -25,6 +25,33 @@ public class MyVaadinUITest {
         ui = new MyVaadinUI();
         request = null; // VaadinRequest can be null for testing basic functionality
     }
+    
+    /**
+     * Helper method to find the button layout from the main layout.
+     */
+    private com.vaadin.ui.HorizontalLayout findButtonLayout(VerticalLayout mainLayout) {
+        for (int i = 0; i < mainLayout.getComponentCount(); i++) {
+            if (mainLayout.getComponent(i) instanceof com.vaadin.ui.HorizontalLayout) {
+                return (com.vaadin.ui.HorizontalLayout) mainLayout.getComponent(i);
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Helper method to find a button by its caption in the button layout.
+     */
+    private Button findButtonByCaption(com.vaadin.ui.HorizontalLayout buttonLayout, String caption) {
+        for (int i = 0; i < buttonLayout.getComponentCount(); i++) {
+            if (buttonLayout.getComponent(i) instanceof Button) {
+                Button btn = (Button) buttonLayout.getComponent(i);
+                if (caption.equals(btn.getCaption())) {
+                    return btn;
+                }
+            }
+        }
+        return null;
+    }
 
     @Test
     @DisplayName("UI should be initialized with content on init")
@@ -451,29 +478,10 @@ public class MyVaadinUITest {
         ui.init(request);
         
         VerticalLayout mainLayout = (VerticalLayout) ui.getContent();
-        
-        // Find the HorizontalLayout containing buttons
-        com.vaadin.ui.HorizontalLayout buttonLayout = null;
-        for (int i = 0; i < mainLayout.getComponentCount(); i++) {
-            if (mainLayout.getComponent(i) instanceof com.vaadin.ui.HorizontalLayout) {
-                buttonLayout = (com.vaadin.ui.HorizontalLayout) mainLayout.getComponent(i);
-                break;
-            }
-        }
-        
+        com.vaadin.ui.HorizontalLayout buttonLayout = findButtonLayout(mainLayout);
         assertNotNull(buttonLayout, "Button layout should exist");
         
-        // Find the Export CSV button
-        Button exportCsvButton = null;
-        for (int i = 0; i < buttonLayout.getComponentCount(); i++) {
-            if (buttonLayout.getComponent(i) instanceof Button) {
-                Button btn = (Button) buttonLayout.getComponent(i);
-                if ("Export CSV".equals(btn.getCaption())) {
-                    exportCsvButton = btn;
-                    break;
-                }
-            }
-        }
+        Button exportCsvButton = findButtonByCaption(buttonLayout, "Export CSV");
         assertNotNull(exportCsvButton, "Export CSV button should exist");
     }
 
@@ -483,30 +491,10 @@ public class MyVaadinUITest {
         ui.init(request);
         
         VerticalLayout mainLayout = (VerticalLayout) ui.getContent();
-        
-        // Find the HorizontalLayout containing buttons
-        com.vaadin.ui.HorizontalLayout buttonLayout = null;
-        for (int i = 0; i < mainLayout.getComponentCount(); i++) {
-            if (mainLayout.getComponent(i) instanceof com.vaadin.ui.HorizontalLayout) {
-                buttonLayout = (com.vaadin.ui.HorizontalLayout) mainLayout.getComponent(i);
-                break;
-            }
-        }
-        
+        com.vaadin.ui.HorizontalLayout buttonLayout = findButtonLayout(mainLayout);
         assertNotNull(buttonLayout, "Button layout should exist");
         
-        // Find the Export CSV button
-        Button exportCsvButton = null;
-        for (int i = 0; i < buttonLayout.getComponentCount(); i++) {
-            if (buttonLayout.getComponent(i) instanceof Button) {
-                Button btn = (Button) buttonLayout.getComponent(i);
-                if ("Export CSV".equals(btn.getCaption())) {
-                    exportCsvButton = btn;
-                    break;
-                }
-            }
-        }
-        
+        Button exportCsvButton = findButtonByCaption(buttonLayout, "Export CSV");
         assertNotNull(exportCsvButton, "Export CSV button should exist");
         
         // Check that the button has a FileDownloader extension
