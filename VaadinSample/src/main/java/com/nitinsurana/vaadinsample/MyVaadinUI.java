@@ -125,14 +125,15 @@ public class MyVaadinUI extends UI {
 
         // Export CSV button with FileDownloader
         final Button exportCsvButton = new Button("Export CSV");
-        final StreamResource csvResource = createCsvResource();
-        final FileDownloader fileDownloader = new FileDownloader(csvResource);
+        final FileDownloader fileDownloader = new FileDownloader(createCsvResource());
         fileDownloader.extend(exportCsvButton);
-        // Update filename before each download to reflect current time
+        // Update resource before each download to reflect current time and data
         exportCsvButton.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(ClickEvent event) {
-                csvResource.setFilename(generateCsvFilename());
+                StreamResource freshCsvResource = createCsvResource();
+                freshCsvResource.setFilename(generateCsvFilename());
+                fileDownloader.setFileDownloadResource(freshCsvResource);
             }
         });
         buttonLayout.addComponent(exportCsvButton);
@@ -168,10 +169,21 @@ public class MyVaadinUI extends UI {
                 StringBuilder csv = new StringBuilder();
                 csv.append("Click Number,Timestamp\n");
                 
-                for (int i = 0; i < clickTimestamps.size(); i++) {
+                // Take a defensive copy to avoid concurrent modification while iterating
+                List<Long> timestampsSnapshot;
+                synchronized (clickTimestamps) {
+                    timestampsSnapshot = new ArrayList<>(clickTimestamps);
+                }
+
+                for (int i = 0; i < timestampsSnapshot.size(); i++) {
                     int clickNumber = i + 1;
-                    String timestamp = DATE_FORMAT.get().format(new Date(clickTimestamps.get(i)));
-                    csv.append(clickNumber).append(",").append(timestamp).append("\n");
+                    String timestamp = DATE_FORMAT.get().format(new Date(timestampsSnapshot.get(i)));
+                    csv.append(clickNumber)
+                       .append(",")
+                       .append("\"")
+                       .append(timestamp.replace("\"", "\"\""))
+                       .append("\"")
+                       .append("\n");
                 }
                 
                 return new ByteArrayInputStream(csv.toString().getBytes(StandardCharsets.UTF_8));
