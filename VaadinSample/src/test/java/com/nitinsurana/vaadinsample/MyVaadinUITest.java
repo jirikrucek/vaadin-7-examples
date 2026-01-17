@@ -1,5 +1,7 @@
 package com.nitinsurana.vaadinsample;
 
+import com.vaadin.server.FileDownloader;
+import com.vaadin.server.StreamResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
@@ -8,6 +10,12 @@ import com.vaadin.ui.VerticalLayout;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,6 +31,33 @@ public class MyVaadinUITest {
     public void setUp() {
         ui = new MyVaadinUI();
         request = null; // VaadinRequest can be null for testing basic functionality
+    }
+    
+    /**
+     * Helper method to find the button layout from the main layout.
+     */
+    private com.vaadin.ui.HorizontalLayout findButtonLayout(VerticalLayout mainLayout) {
+        for (int i = 0; i < mainLayout.getComponentCount(); i++) {
+            if (mainLayout.getComponent(i) instanceof com.vaadin.ui.HorizontalLayout) {
+                return (com.vaadin.ui.HorizontalLayout) mainLayout.getComponent(i);
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Helper method to find a button by its caption in the button layout.
+     */
+    private Button findButtonByCaption(com.vaadin.ui.HorizontalLayout buttonLayout, String caption) {
+        for (int i = 0; i < buttonLayout.getComponentCount(); i++) {
+            if (buttonLayout.getComponent(i) instanceof Button) {
+                Button btn = (Button) buttonLayout.getComponent(i);
+                if (caption.equals(btn.getCaption())) {
+                    return btn;
+                }
+            }
+        }
+        return null;
     }
 
     @Test
@@ -416,8 +451,8 @@ public class MyVaadinUITest {
     }
 
     @Test
-    @DisplayName("Two buttons should be present in button layout")
-    public void testTwoButtonsPresent() {
+    @DisplayName("Three buttons should be present in button layout")
+    public void testThreeButtonsPresent() {
         ui.init(request);
         
         VerticalLayout mainLayout = (VerticalLayout) ui.getContent();
@@ -441,7 +476,137 @@ public class MyVaadinUITest {
             }
         }
         
-        assertEquals(2, buttonCount, "Should have exactly 2 buttons (Click Me and Clear History)");
+        assertEquals(3, buttonCount, "Should have exactly 3 buttons (Click Me, Clear History, and Export CSV)");
+    }
+
+    @Test
+    @DisplayName("Export CSV button should be present")
+    public void testExportCsvButtonPresent() {
+        ui.init(request);
+        
+        VerticalLayout mainLayout = (VerticalLayout) ui.getContent();
+        com.vaadin.ui.HorizontalLayout buttonLayout = findButtonLayout(mainLayout);
+        assertNotNull(buttonLayout, "Button layout should exist");
+        
+        Button exportCsvButton = findButtonByCaption(buttonLayout, "Export CSV");
+        assertNotNull(exportCsvButton, "Export CSV button should exist");
+    }
+
+    @Test
+    @DisplayName("Export CSV button should have FileDownloader extension")
+    public void testExportCsvButtonHasFileDownloaderExtension() {
+        ui.init(request);
+        
+        VerticalLayout mainLayout = (VerticalLayout) ui.getContent();
+        com.vaadin.ui.HorizontalLayout buttonLayout = findButtonLayout(mainLayout);
+        assertNotNull(buttonLayout, "Button layout should exist");
+        
+        Button exportCsvButton = findButtonByCaption(buttonLayout, "Export CSV");
+        assertNotNull(exportCsvButton, "Export CSV button should exist");
+        
+        // Check that the button has a FileDownloader extension
+        boolean hasFileDownloader = false;
+        for (Object extension : exportCsvButton.getExtensions()) {
+            if (extension instanceof FileDownloader) {
+                hasFileDownloader = true;
+                break;
+            }
+        }
+        assertTrue(hasFileDownloader, "Export CSV button should have FileDownloader extension");
+    }
+
+    @Test
+    @DisplayName("CSV content should have correct format with headers and quoted timestamps")
+    public void testCsvContentFormat() throws Exception {
+        ui.init(request);
+        
+        VerticalLayout mainLayout = (VerticalLayout) ui.getContent();
+        com.vaadin.ui.HorizontalLayout buttonLayout = findButtonLayout(mainLayout);
+        
+        // Click the "Click Me" button a few times to generate history
+        Button clickButton = findButtonByCaption(buttonLayout, "Click Me");
+        assertNotNull(clickButton, "Click Me button should exist");
+        
+        clickButton.click();
+        clickButton.click();
+        clickButton.click();
+        
+        // Find the Export CSV button and get the FileDownloader
+        Button exportCsvButton = findButtonByCaption(buttonLayout, "Export CSV");
+        assertNotNull(exportCsvButton, "Export CSV button should exist");
+        
+        FileDownloader fileDownloader = null;
+        for (Object extension : exportCsvButton.getExtensions()) {
+            if (extension instanceof FileDownloader) {
+                fileDownloader = (FileDownloader) extension;
+                break;
+            }
+        }
+        assertNotNull(fileDownloader, "FileDownloader should exist");
+        
+        // Simulate clicking the export button to update the resource
+        exportCsvButton.click();
+        
+        // Get the StreamResource and verify CSV content
+        StreamResource resource = (StreamResource) fileDownloader.getFileDownloadResource();
+        assertNotNull(resource, "StreamResource should exist");
+        assertEquals("text/csv", resource.getMIMEType(), "MIME type should be text/csv");
+        
+        // Get the CSV content
+        InputStream inputStream = resource.getStreamSource().getStream();
+        String csvContent = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
+                .lines()
+                .collect(Collectors.joining("\n"));
+        
+        // Verify CSV header
+        String[] lines = csvContent.split("\n");
+        assertTrue(lines.length >= 4, "CSV should have header and 3 data rows");
+        assertEquals("Click Number,Timestamp", lines[0], "CSV header should be correct");
+        
+        // Verify data rows have proper format with quoted timestamps
+        for (int i = 1; i < lines.length; i++) {
+            String[] columns = lines[i].split(",", 2);
+            assertEquals(2, columns.length, "Each row should have 2 columns");
+            assertEquals(String.valueOf(i), columns[0], "Click number should match row number");
+            assertTrue(columns[1].startsWith("\""), "Timestamp should be quoted");
+            assertTrue(columns[1].endsWith("\""), "Timestamp should be quoted");
+        }
+    }
+
+    @Test
+    @DisplayName("CSV filename should follow YYYYMMDD_HHMM convention")
+    public void testCsvFilenameFormat() {
+        ui.init(request);
+        
+        VerticalLayout mainLayout = (VerticalLayout) ui.getContent();
+        com.vaadin.ui.HorizontalLayout buttonLayout = findButtonLayout(mainLayout);
+        
+        Button exportCsvButton = findButtonByCaption(buttonLayout, "Export CSV");
+        assertNotNull(exportCsvButton, "Export CSV button should exist");
+        
+        // Simulate click to update the resource
+        exportCsvButton.click();
+        
+        FileDownloader fileDownloader = null;
+        for (Object extension : exportCsvButton.getExtensions()) {
+            if (extension instanceof FileDownloader) {
+                fileDownloader = (FileDownloader) extension;
+                break;
+            }
+        }
+        assertNotNull(fileDownloader, "FileDownloader should exist");
+        
+        StreamResource resource = (StreamResource) fileDownloader.getFileDownloadResource();
+        String filename = resource.getFilename();
+        
+        // Verify filename format: click_history_YYYYMMDD_HHMM.csv
+        assertTrue(filename.startsWith("click_history_"), "Filename should start with 'click_history_'");
+        assertTrue(filename.endsWith(".csv"), "Filename should end with '.csv'");
+        
+        // Extract and validate the date/time portion
+        String dateTimePart = filename.substring("click_history_".length(), filename.length() - ".csv".length());
+        assertTrue(dateTimePart.matches("\\d{8}_\\d{4}"), 
+                  "Date/time should be in YYYYMMDD_HHMM format, but was: " + dateTimePart);
     }
 
 }
