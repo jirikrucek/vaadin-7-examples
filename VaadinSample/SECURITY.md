@@ -3,6 +3,43 @@
 ## Overview
 This document describes the security analysis performed on the VaadinSample application and the improvements implemented to address identified vulnerabilities.
 
+## Critical Security Alert: Known ReDoS Vulnerability
+
+**⚠️ IMPORTANT**: Vaadin 7.7.17 (the latest publicly available version) contains a known **Regular Expression Denial of Service (ReDoS)** vulnerability in the EmailValidator class (CVE identifier pending).
+
+### Vulnerability Details:
+- **Affected Versions**: Vaadin >= 7.0.0.beta1, < 7.7.22
+- **Patched Version**: 7.7.22 (Enterprise Only)
+- **Severity**: Medium to High
+- **Component**: EmailValidator class
+- **Attack Vector**: Specially crafted email strings can cause exponential regex evaluation time
+
+### Mitigation Status:
+❌ **Cannot be fully patched with public versions** - Version 7.7.22 and later are only available through Vaadin Enterprise subscription.
+
+### Recommended Actions:
+
+**Option 1: Vaadin Enterprise Subscription (Recommended for Production)**
+- Subscribe to Vaadin Extended Maintenance to get version 7.7.22+
+- Provides ongoing security patches
+- Contact: https://vaadin.com/support/vaadin-7-extended-maintenance
+
+**Option 2: Workarounds for Current Version**
+1. **Avoid using EmailValidator** - If the application doesn't use Vaadin's EmailValidator, the vulnerability is not exploitable
+2. **Input validation** - Implement length limits on email input fields (max 254 characters per RFC 5321)
+3. **Rate limiting** - Implement request rate limiting to prevent DoS attacks
+4. **WAF rules** - Use Web Application Firewall to detect and block suspicious patterns
+
+**Option 3: Framework Migration (Recommended for Long-term)**
+- Migrate to Vaadin 8 LTS or Vaadin Flow (latest)
+- Both receive active security support
+- Vaadin 7 reached end-of-life and no longer receives public security updates
+
+### Current Application Impact Assessment:
+- **Risk Level**: LOW for this specific application
+- **Reason**: The VaadinSample application does not currently use EmailValidator
+- **Recommendation**: Do not add email validation features without addressing this vulnerability
+
 ## Security Issues Identified and Fixed
 
 ### 1. ✅ FIXED: Outdated Vaadin Framework Version (CRITICAL)
@@ -13,9 +50,10 @@ This document describes the security analysis performed on the VaadinSample appl
 - Cross-site request forgery (CSRF) vulnerabilities  
 - Other security issues fixed in later versions
 
-**Resolution**: Updated Vaadin from version 7.0.5 to 7.7.17 (latest stable Vaadin 7.x release)
+**Resolution**: Updated Vaadin from version 7.0.5 to 7.7.17 (latest publicly available Vaadin 7.x release)
 - File: `pom.xml` - Updated vaadin.version property
-- This version includes all security patches released for the Vaadin 7 framework series
+- This version includes most security patches released for the Vaadin 7 framework series
+- **Note**: Version 7.7.17 still contains the EmailValidator ReDoS vulnerability (see alert above)
 
 ### 2. ✅ FIXED: Production Mode Disabled (HIGH)
 **Issue**: The application had `productionMode` set to `false` in web.xml, which exposes debugging information.
@@ -121,14 +159,19 @@ This document describes the security analysis performed on the VaadinSample appl
 ## Summary
 
 This security analysis addressed **5 critical, high, and medium severity issues**:
-- Updated Vaadin framework to latest 7.x version
+- Updated Vaadin framework to latest publicly available 7.x version (7.7.17)
 - Enabled production mode
 - Secured repository URLs
 - Updated servlet API
 - Updated Jetty plugin
 
-The application now has significantly improved security posture, though migration to a supported framework version is recommended for long-term security.
+**Important**: The application still contains a known ReDoS vulnerability in EmailValidator (fixed in 7.7.22, Enterprise only). The current VaadinSample application does not use this component, so the immediate risk is LOW. However, for production use or when adding email validation features:
+- Consider Vaadin Enterprise subscription for patch access
+- Implement the recommended workarounds
+- Plan migration to supported framework version
+
+The application now has significantly improved security posture compared to the original version, though migration to a supported framework version with active security updates is strongly recommended for long-term security.
 
 ---
 *Last Updated: January 17, 2026*
-*Security Analysis Version: 1.0*
+*Security Analysis Version: 1.1*
