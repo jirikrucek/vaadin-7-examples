@@ -117,7 +117,9 @@ public class MyVaadinUI extends UI {
             @Override
             public void buttonClick(ClickEvent event) {
                 clickHistory.clear();
-                clickTimestamps.clear();
+                synchronized (clickTimestamps) {
+                    clickTimestamps.clear();
+                }
                 historyLayout.removeAllComponents();
             }
         });
@@ -131,9 +133,7 @@ public class MyVaadinUI extends UI {
         exportCsvButton.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(ClickEvent event) {
-                StreamResource freshCsvResource = createCsvResource();
-                freshCsvResource.setFilename(generateCsvFilename());
-                fileDownloader.setFileDownloadResource(freshCsvResource);
+                fileDownloader.setFileDownloadResource(createCsvResource());
             }
         });
         buttonLayout.addComponent(exportCsvButton);
@@ -156,7 +156,9 @@ public class MyVaadinUI extends UI {
         String timestamp = DATE_FORMAT.get().format(new Date(lastClickTime));
         String historyEntry = "Click #" + clickCount + " at " + timestamp;
         clickHistory.add(historyEntry);
-        clickTimestamps.add(lastClickTime);
+        synchronized (clickTimestamps) {
+            clickTimestamps.add(lastClickTime);
+        }
         
         Label historyLabel = new Label(historyEntry);
         historyLayout.addComponent(historyLabel);
