@@ -27,7 +27,7 @@ This document describes the security analysis performed on the VaadinSample appl
 
 **Option 2: Workarounds for Current Version**
 1. **Avoid using EmailValidator** - If the application doesn't use Vaadin's EmailValidator, the vulnerability is not exploitable
-2. **Input validation** - Implement length limits on email input fields (max 254 characters per RFC 5321 Section 4.5.3.1.3)
+2. **Input validation** - Implement length limits on email input fields (max 254 characters per RFC 5321 Section 4.5.3.1)
 3. **Rate limiting** - Implement request rate limiting to prevent DoS attacks
 4. **WAF rules** - Use Web Application Firewall to detect and block suspicious patterns
 
