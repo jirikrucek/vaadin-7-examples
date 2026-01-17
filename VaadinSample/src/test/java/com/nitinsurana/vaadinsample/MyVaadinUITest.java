@@ -1,5 +1,6 @@
 package com.nitinsurana.vaadinsample;
 
+import com.vaadin.server.FileDownloader;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
@@ -416,8 +417,8 @@ public class MyVaadinUITest {
     }
 
     @Test
-    @DisplayName("Two buttons should be present in button layout")
-    public void testTwoButtonsPresent() {
+    @DisplayName("Three buttons should be present in button layout")
+    public void testThreeButtonsPresent() {
         ui.init(request);
         
         VerticalLayout mainLayout = (VerticalLayout) ui.getContent();
@@ -441,7 +442,82 @@ public class MyVaadinUITest {
             }
         }
         
-        assertEquals(2, buttonCount, "Should have exactly 2 buttons (Click Me and Clear History)");
+        assertEquals(3, buttonCount, "Should have exactly 3 buttons (Click Me, Clear History, and Export CSV)");
+    }
+
+    @Test
+    @DisplayName("Export CSV button should be present")
+    public void testExportCsvButtonPresent() {
+        ui.init(request);
+        
+        VerticalLayout mainLayout = (VerticalLayout) ui.getContent();
+        
+        // Find the HorizontalLayout containing buttons
+        com.vaadin.ui.HorizontalLayout buttonLayout = null;
+        for (int i = 0; i < mainLayout.getComponentCount(); i++) {
+            if (mainLayout.getComponent(i) instanceof com.vaadin.ui.HorizontalLayout) {
+                buttonLayout = (com.vaadin.ui.HorizontalLayout) mainLayout.getComponent(i);
+                break;
+            }
+        }
+        
+        assertNotNull(buttonLayout, "Button layout should exist");
+        
+        // Find the Export CSV button
+        Button exportCsvButton = null;
+        for (int i = 0; i < buttonLayout.getComponentCount(); i++) {
+            if (buttonLayout.getComponent(i) instanceof Button) {
+                Button btn = (Button) buttonLayout.getComponent(i);
+                if ("Export CSV".equals(btn.getCaption())) {
+                    exportCsvButton = btn;
+                    break;
+                }
+            }
+        }
+        assertNotNull(exportCsvButton, "Export CSV button should exist");
+    }
+
+    @Test
+    @DisplayName("Export CSV button should have FileDownloader extension")
+    public void testExportCsvButtonHasFileDownloaderExtension() {
+        ui.init(request);
+        
+        VerticalLayout mainLayout = (VerticalLayout) ui.getContent();
+        
+        // Find the HorizontalLayout containing buttons
+        com.vaadin.ui.HorizontalLayout buttonLayout = null;
+        for (int i = 0; i < mainLayout.getComponentCount(); i++) {
+            if (mainLayout.getComponent(i) instanceof com.vaadin.ui.HorizontalLayout) {
+                buttonLayout = (com.vaadin.ui.HorizontalLayout) mainLayout.getComponent(i);
+                break;
+            }
+        }
+        
+        assertNotNull(buttonLayout, "Button layout should exist");
+        
+        // Find the Export CSV button
+        Button exportCsvButton = null;
+        for (int i = 0; i < buttonLayout.getComponentCount(); i++) {
+            if (buttonLayout.getComponent(i) instanceof Button) {
+                Button btn = (Button) buttonLayout.getComponent(i);
+                if ("Export CSV".equals(btn.getCaption())) {
+                    exportCsvButton = btn;
+                    break;
+                }
+            }
+        }
+        
+        assertNotNull(exportCsvButton, "Export CSV button should exist");
+        
+        // Check that the button has a FileDownloader extension
+        boolean hasFileDownloader = false;
+        for (Object extension : exportCsvButton.getExtensions()) {
+            if (extension instanceof FileDownloader) {
+                hasFileDownloader = true;
+                break;
+            }
+        }
+        assertTrue(hasFileDownloader, "Export CSV button should have FileDownloader extension");
     }
 
 }

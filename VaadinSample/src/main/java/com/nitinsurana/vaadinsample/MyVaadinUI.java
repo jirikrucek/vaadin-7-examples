@@ -1,5 +1,7 @@
 package com.nitinsurana.vaadinsample;
 
+import com.vaadin.server.FileDownloader;
+import com.vaadin.server.StreamResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -8,6 +10,9 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,6 +35,14 @@ public class MyVaadinUI extends UI {
         }
     };
     
+    // ThreadLocal for filename date format (YYYYMMDD_HHMM)
+    private static final ThreadLocal<SimpleDateFormat> FILENAME_DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyyMMdd_HHmm");
+        }
+    };
+    
     private int clickCount = 0;
     private long sessionStartTime;
     private long lastClickTime;
@@ -39,12 +52,14 @@ public class MyVaadinUI extends UI {
     private Label sessionDurationLabel;
     private VerticalLayout historyLayout;
     private List<String> clickHistory;
+    private List<Long> clickTimestamps;
 
     @Override
     protected void init(VaadinRequest request) {
         sessionStartTime = System.currentTimeMillis();
         lastClickTime = sessionStartTime;
         clickHistory = new ArrayList<>();
+        clickTimestamps = new ArrayList<>();
         
         final VerticalLayout layout = new VerticalLayout();
         layout.setMargin(true);
@@ -102,10 +117,18 @@ public class MyVaadinUI extends UI {
             @Override
             public void buttonClick(ClickEvent event) {
                 clickHistory.clear();
+                clickTimestamps.clear();
                 historyLayout.removeAllComponents();
             }
         });
         buttonLayout.addComponent(clearHistoryButton);
+
+        // Export CSV button with FileDownloader
+        final Button exportCsvButton = new Button("Export CSV");
+        StreamResource csvResource = createCsvResource();
+        FileDownloader fileDownloader = new FileDownloader(csvResource);
+        fileDownloader.extend(exportCsvButton);
+        buttonLayout.addComponent(exportCsvButton);
 
         layout.addComponent(buttonLayout);
     }
@@ -125,8 +148,34 @@ public class MyVaadinUI extends UI {
         String timestamp = DATE_FORMAT.get().format(new Date(lastClickTime));
         String historyEntry = "Click #" + clickCount + " at " + timestamp;
         clickHistory.add(historyEntry);
+        clickTimestamps.add(lastClickTime);
         
         Label historyLabel = new Label(historyEntry);
         historyLayout.addComponent(historyLabel);
+    }
+    
+    private StreamResource createCsvResource() {
+        StreamResource resource = new StreamResource(new StreamResource.StreamSource() {
+            @Override
+            public InputStream getStream() {
+                StringBuilder csv = new StringBuilder();
+                csv.append("Click Number,Timestamp\n");
+                
+                for (int i = 0; i < clickTimestamps.size(); i++) {
+                    int clickNumber = i + 1;
+                    String timestamp = DATE_FORMAT.get().format(new Date(clickTimestamps.get(i)));
+                    csv.append(clickNumber).append(",").append(timestamp).append("\n");
+                }
+                
+                return new ByteArrayInputStream(csv.toString().getBytes(StandardCharsets.UTF_8));
+            }
+        }, generateCsvFilename());
+        resource.setMIMEType("text/csv");
+        return resource;
+    }
+    
+    private String generateCsvFilename() {
+        String dateTime = FILENAME_DATE_FORMAT.get().format(new Date());
+        return "click_history_" + dateTime + ".csv";
     }
 }
